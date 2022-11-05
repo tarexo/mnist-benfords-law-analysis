@@ -1,0 +1,4 @@
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QBenfords Law Analysis\nIn this notebook analyze the distribution of first significant digits (fsd) of different aspects of an image.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QAs an example dataset we will use the famous grayscale MNIST dataset, which is included in tensorflow keras.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QAs an example dataset we will use the famous grayscale MNIST dataset, which is included in tensorflow keras.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QAs an example dataset we will use the famous grayscale MNIST dataset, which is included in tensorflow keras.\\E$"}
