@@ -39,10 +39,16 @@ def to_fsd(values: npt.ArrayLike, mode: int = FSD_FAST) -> npt.ArrayLike:
             num = int(np.floor(abs(value * (10 ** -int(floor(log10(abs(value))))))))
             fsd.append(num)
     elif mode == FSD_FAST:
-        n = np.abs(values * np.power(np.full(values.shape, 10.), -np.floor(np.log10(np.abs(values).astype("float64"))))).astype("int")
+        n = np.abs(
+            values
+            * np.power(
+                np.full(values.shape, 10.0),
+                -np.floor(np.log10(np.abs(values).astype("float64"))),
+            )
+        ).astype("int")
         fsd.extend(n)
     return np.array(fsd)
-        
+
 
 def count_fsds(fsds: npt.ArrayLike, base: int = BASE_10) -> npt.ArrayLike:
     """Counts up the occurence of each digit, depending on the base (1-9 for base 10).
@@ -54,7 +60,7 @@ def count_fsds(fsds: npt.ArrayLike, base: int = BASE_10) -> npt.ArrayLike:
         npt.ArrayLike: An array of the summed digits of length base - 1
     """
     count = []
-    for i in range(1,base):
+    for i in range(1, base):
         count.append(np.count_nonzero(fsds == i))
     return np.array(count)
 
@@ -66,7 +72,7 @@ def benfords_law() -> npt.ArrayLike:
         npt.ArrayLike: The benfords law distribution for base10 digits
     """
     bf_law = []
-    for i in range(1,10):
+    for i in range(1, 10):
         bf_law.append(log10(1 + (1 / i)))
     return np.array(bf_law)
 
@@ -84,22 +90,26 @@ def kullback_leibler_divergence(fsds: npt.ArrayLike) -> float:
     err = 0
     for i in range(len(bf_law)):
         err += fsds[i] * np.log(fsds[i] / bf_law[i])
-    return err# / len(bf_law)
+    return err  # / len(bf_law)
 
 
 def jensen_shannon_divergence(fsds: npt.ArrayLike) -> float:
     bf_law = benfords_law()
-    
+
     err = 0
     for i in range(len(bf_law)):
         err += fsds[i] * np.log(fsds[i] / bf_law[i])
 
     for i in range(len(bf_law)):
         err += bf_law[i] * np.log(bf_law[i] / fsds[i])
-    return err #/ len(bf_law)
+    return err  # / len(bf_law)
 
 
-def plot_df_comparison(fsd_count_dist: npt.ArrayLike, base: int = BASE_10, title: str = "Measurements vs. Benfords Law"):
+def plot_df_comparison(
+    fsd_count_dist: npt.ArrayLike,
+    base: int = BASE_10,
+    title: str = "Measurements vs. Benfords Law",
+):
     """Plot Benfords law against measured first significant digits.
 
     Args:
@@ -115,14 +125,29 @@ def plot_df_comparison(fsd_count_dist: npt.ArrayLike, base: int = BASE_10, title
     mae = np.round(mae_to_benfords_law(fsd_count_dist), decimals=6)
     kld = np.round(kullback_leibler_divergence(fsd_count_dist), decimals=6)
     jsd = np.round(jensen_shannon_divergence(fsd_count_dist), decimals=6)
-    title = title + "\n - Mean absolute error: " + str(mae) + "\n - Kullback-Leibler: " + str(kld) + "\n - Jensen-Shannon: " + str(jsd)
+    title = (
+        title
+        + "\n - Mean absolute error: "
+        + str(mae)
+        + "\n - Kullback-Leibler: "
+        + str(kld)
+        + "\n - Jensen-Shannon: "
+        + str(jsd)
+    )
 
     fig = go.Figure()
-    fig.add_bar(x=df["digit"], y=df["MNIST FSD count"], name="Measurements", hoverinfo="y")
-    fig.add_scatter(x=df["digit"], y=df["Benfords Law (ground truth)"], name="Ground Truth", hoverinfo="y")
+    fig.add_bar(
+        x=df["digit"], y=df["MNIST FSD count"], name="Measurements", hoverinfo="y"
+    )
+    fig.add_scatter(
+        x=df["digit"],
+        y=df["Benfords Law (ground truth)"],
+        name="Ground Truth",
+        hoverinfo="y",
+    )
     fig.update_layout(title=title, xaxis_title="Digits", yaxis_title="Distribution")
 
-    fig.show(renderer="browser")
+    fig.show()  # renderer="browser")
 
 
 def img_to_blocks(image: npt.ArrayLike) -> npt.ArrayLike:
@@ -135,17 +160,19 @@ def img_to_blocks(image: npt.ArrayLike) -> npt.ArrayLike:
         npt.ArrayLike: 8x8 blocks of the image
     """
     if len(image.shape) > 2:
-        image = image.reshape(28,28)
+        image = image.reshape(28, 28)
     num_blocks = int(image.shape[0] / 8)
     blocks = []
     for row in range(0, (num_blocks) * 8, 8):
         for col in range(0, (num_blocks) * 8, 8):
-            block = image[row:row+8, col:col+8]
+            block = image[row : row + 8, col : col + 8]
             blocks.append(block)
     return np.array(blocks)
 
 
-def quantize_block(block: npt.ArrayLike, q_table: npt.ArrayLike = QUANTIZATION_TABLE) -> npt.ArrayLike:
+def quantize_block(
+    block: npt.ArrayLike, q_table: npt.ArrayLike = QUANTIZATION_TABLE
+) -> npt.ArrayLike:
     """Takes a DC transformed 8x8 block and performs a quantization.
 
     Args:
